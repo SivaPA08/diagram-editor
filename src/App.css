@@ -1,0 +1,31 @@
+.main{
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 200px calc(100% - 200px);
+  grid-template-rows: 50px calc(100% - 70px) 20px;
+  grid-template-areas: 
+      "header header"
+      "side board"
+      "footer footer"
+  ;
+}
+.header{
+  grid-area: header;
+  background-color: black;
+}
+.header h3{
+  color:aliceblue
+}
+.side{
+  grid-area: side;
+  background-color: yellow;
+
+}
+.board{
+  grid-area: board;
+  background-color: grey;
+}
+.footer{
+  grid-area: footer;
+  background-color: blue;
+}
