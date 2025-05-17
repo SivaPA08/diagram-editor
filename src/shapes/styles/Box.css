@@ -1,5 +1,13 @@
-.box{
-    width: 60px;
+.box {
+    width: 100px;
     height: 100px;
+    background-color: steelblue;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
     cursor: grab;
-}
+    position: absolute;
+  }
+  
