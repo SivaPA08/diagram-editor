@@ -3,59 +3,79 @@ import './App.css';
 import Box from './shapes/Box';
 
 function App() {
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const dragging = useRef(false);
+  const [boxes, setBoxes] = useState([]);
+  const dragging = useRef({ active: false, id: null });
   const offset = useRef({ x: 0, y: 0 });
   const boardRef = useRef(null);
 
-  function startDragging(e) {
-    dragging.current = true;
-    offset.current = {
-      x: e.clientX - pos.x,
-      y: e.clientY - pos.y
+  function addBox() {
+    const newBox = {
+      id: Date.now(),
+      pos: { x: 0, y: 0 }
     };
+    setBoxes((prev) => [...prev, newBox]);
+  }
+
+  function startDragging(e, id) {
+    dragging.current = { active: true, id };
+    const box = boxes.find((b) => b.id === id);
+    if (box) {
+      offset.current = {
+        x: e.clientX - box.pos.x,
+        y: e.clientY - box.pos.y
+      };
+    }
   }
 
   function stopDragging() {
-    dragging.current = false;
+    dragging.current = { active: false, id: null };
   }
 
   function onMouseMove(e) {
-    if (dragging.current && boardRef.current) {
-      const boardRect = boardRef.current.getBoundingClientRect();
+    if (!dragging.current.active || !boardRef.current) return;
+    const { id } = dragging.current;
+    const boardRect = boardRef.current.getBoundingClientRect();
+    const boxWidth = 100;
+    const boxHeight = 100;
 
-      let newX = e.clientX - offset.current.x;
-      let newY = e.clientY - offset.current.y;
+    let newX = e.clientX - offset.current.x;
+    let newY = e.clientY - offset.current.y;
 
-      // Boundaries: Box stays inside board
-      const boxWidth = 100; // match your Box CSS width
-      const boxHeight = 100; // match your Box CSS height
+    newX = Math.max(0, Math.min(newX, boardRect.width - boxWidth));
+    newY = Math.max(0, Math.min(newY, boardRect.height - boxHeight));
 
-      newX = Math.max(0, Math.min(newX, boardRect.width - boxWidth));
-      newY = Math.max(0, Math.min(newY, boardRect.height - boxHeight));
-
-      setPos({ x: newX, y: newY });
-    }
+    setBoxes((prev) =>
+      prev.map((b) =>
+        b.id === id ? { ...b, pos: { x: newX, y: newY } } : b
+      )
+    );
   }
 
   useEffect(() => {
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', stopDragging);
-
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', stopDragging);
     };
-  }, [pos]);
+  }, [boxes]);
 
   return (
     <div className='main'>
       <div className="header">
         <h3>Work in progress</h3>
       </div>
-      <div className="side"></div>
+      <div className="side">
+        <button onClick={addBox}>Add Box</button>
+      </div>
       <div className="board" ref={boardRef}>
-        <Box pos={pos} onMouseDown={startDragging} />
+        {boxes.map((box) => (
+          <Box
+            key={box.id}
+            pos={box.pos}
+            onMouseDown={(e) => startDragging(e, box.id)}
+          />
+        ))}
       </div>
       <div className="footer"></div>
     </div>
@@ -63,3 +83,4 @@ function App() {
 }
 
 export default App;
+
